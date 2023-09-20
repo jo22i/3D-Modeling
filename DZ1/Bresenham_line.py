@@ -9,7 +9,7 @@ for x in range(0, image.width):
         if((x%2 == 0 and y%2 == 0) or (x%2 == 1 and y%2 == 1)):
             image.putpixel((x, y), (54, 54, 54))
             
-def Brezenkhem(x0, y0, x1, y1):
+def Bresenham(x0, y0, x1, y1):
     delta_x = abs(x1 - x0)
     delta_y = abs(y1 - y0)
     error = 0
@@ -51,7 +51,7 @@ x0 = int(input("Координата x первой точки: "))
 y0 = int(input("Координата y первой точки: "))
 x1 = int(input("Координата x второй точки: "))
 y1 = int(input("Координата y второй точки: "))
-Brezenkhem(x0, y0, x1, y1)
+Bresenham(x0, y0, x1, y1)
 
 # Зеркальное отражение картинки для естественного отображения координатной плоскости
 image = ImageOps.flip(image)
