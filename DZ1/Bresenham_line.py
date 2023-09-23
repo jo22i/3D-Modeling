@@ -6,7 +6,7 @@ image = Image.new('RGB', (25+1, 25+1))
 # Заполнение координатной плоскости серыми квадратами для лучшего визуального наблюдения
 for x in range(0, image.width):
     for y in range(0, image.height):
-        if((x%2 == 0 and y%2 == 0) or (x%2 == 1 and y%2 == 1)):
+        if(x%2 == y%2):
             image.putpixel((x, y), (54, 54, 54))
             
 def Bresenham(x0, y0, x1, y1):
