@@ -1,13 +1,5 @@
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
-
-image = Image.new('RGB', (25+1, 25+1))
-
-# Заполнение координатной плоскости серыми квадратами для лучшего визуального наблюдения
-for x in range(0, image.width):
-    for y in range(0, image.height):
-        if(x%2 == y%2):
-            image.putpixel((x, y), (54, 54, 54))
             
 def Bresenham(x0, y0, x1, y1):
     delta_x = abs(x1 - x0)
@@ -51,6 +43,15 @@ x0 = int(input("Координата x первой точки: "))
 y0 = int(input("Координата y первой точки: "))
 x1 = int(input("Координата x второй точки: "))
 y1 = int(input("Координата y второй точки: "))
+
+image = Image.new('RGB', (max(x0, x1) + 20, max(y0, y1)+ 20))
+
+# Заполнение координатной плоскости серыми квадратами для лучшего визуального наблюдения
+for x in range(0, image.width):
+    for y in range(0, image.height):
+        if(x%2 == y%2):
+            image.putpixel((x, y), (54, 54, 54))
+
 Bresenham(x0, y0, x1, y1)
 
 # Зеркальное отражение картинки для естественного отображения координатной плоскости
