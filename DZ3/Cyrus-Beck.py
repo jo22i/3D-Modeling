@@ -75,7 +75,7 @@ def Bresenham(x0, y0, x1, y1, color = (255, 255, 255)):
 def Cyrus_Beck():
     global xA, yA, xB, yB, polygon_axes
 
-    t0, t1 = 0, 1
+    tA, tB = 0, 1
     Dx, Dy = (xB - xA), (yB - yA)
 
     for i in range(-1, len(polygon_axes)-1):
@@ -96,19 +96,23 @@ def Cyrus_Beck():
         if(Pi == 0):
             # Отрезок вне окна, отсечение закончено
             # Иначе рассматриваем след. отрезок
-            if(Qi < 0): break
+            if(Qi < 0): return None, None
             continue
         # Вычисляется параметр t, а также смотрим его положение относительно началов отрезков
         # Если Pi < 0, то эта точка ближе к концу отрезка, поэтому смотрим наименьшее значение
         # Иначе точка ближе к началу отрезка, и мы ищем наибольшее значение
-        t = - Qi / Pi
+        t = - (Qi / Pi)
         if not(0 <= t <= 1): continue
-        if(Pi < 0):
-            t1 = min(t1, t)
-        else:
-            t0 = max(t0, t)
 
-    return t0, t1
+        if(Pi < 0):
+            tA = max(tA, t)
+        else:
+            tB = min(tB, t)
+
+    if (tA <= tB):
+        return tA, tB
+    
+    return None, None
 
 plt.imshow(image)
 plt.show()
@@ -125,7 +129,7 @@ t_begin, t_end = Cyrus_Beck()
 
 # Если выполняется условие, то отрисовываем линию, получив координаты точек через параметрическое уравнение,
 # с поправкой на то, что часть отрезка или весь отрезок может оказаться внутри
-if (t_begin <= t_end):
+if ((t_begin and t_end) != None):
     if(t_begin != 0):
         xA, yA = round(xB*t_begin + xA*(1-t_begin)), round(yB*t_begin + yA*(1-t_begin))
     if(t_end != 1):
