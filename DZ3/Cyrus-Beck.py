@@ -1,7 +1,6 @@
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 
-
 # Функция обработки кнопок мыши, отключается как только пользователь введёт координаты отрезка
 def on_click(event):
     global xA, yA, xB, yB, cid
