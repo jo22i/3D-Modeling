@@ -103,7 +103,7 @@ def Cyrus_Beck():
 
 polygon_axes = []
 xA, yA, xB, yB = None, None, None, None
-image = Image.new('RGB', (30, 30))
+image = Image.new('RGB', (50, 50))
 image = ImageOps.flip(image)
 cid = plt.connect("button_press_event", on_click)
 

@@ -46,8 +46,8 @@ with Image.open("valve.png") as image:
     new_image = Image.new('RGB', (image.width, image.height))
     pixel_values = list(image.getdata())
 
-    for x in range(0, image.width-1):
-        for y in range(0, image.height-1):
+    for x in range(image.width-1):
+        for y in range(image.height-1):
             new_color = Sobel_Operator(x, y, image.width, image.height, pixel_values)
             new_image.putpixel((x, y), new_color)
     
