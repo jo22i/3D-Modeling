@@ -62,8 +62,8 @@ def Fill_BPM(begin: int, end: int, filler_color: tuple):
         current_layer.sort()
 
         for i in range(0, len(current_layer), 2):
-            if (i + 1 == len(current_layer)): continue
-            for X in range(current_layer[i][0], current_layer[i+1][0]+1):
+            if (i+1 == len(current_layer)): break
+            for X in range(current_layer[i][0], current_layer[i+1][0]):
                 image.putpixel((X, Y), filler_color)
 
 

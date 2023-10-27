@@ -92,9 +92,11 @@ def Cyrus_Beck():
         if not(0 <= t <= 1): continue
 
         if(Pi < 0):
-            tA = max(tA, t)
-        else:
             tB = min(tB, t)
+            if (tA > tB): return None, None
+        else:
+            tA = max(tA, t)
+            if (tA > tB): return None, None
 
     if (tA <= tB):
         return tA, tB
