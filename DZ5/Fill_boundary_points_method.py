@@ -70,7 +70,7 @@ def Fill_BPM(begin: int, end: int, filler_color: tuple):
 points = []
 sides = []
 
-with Image.new("RGB", (10, 10)) as image:
+with Image.new("RGB", (5, 5)) as image:
     cid = plt.connect("button_press_event", on_click)
 
     for x in range(0, image.width):
