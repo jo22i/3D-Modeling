@@ -1,4 +1,4 @@
-from PIL import Image, ImageOps
+from PIL import Image
 import matplotlib.pyplot as plt
 from math import sin, cos, pi
 
@@ -7,9 +7,13 @@ def ChangeVector(change_matrix: list, vector: list):
 
     for i in range(len(change_matrix)):
         for j in range(len(vector)):
-            new_vector[j] += change_matrix[i][j] * vector[j]
+            new_vector[i] += change_matrix[i][j] * vector[j]
 
     return new_vector
+
+
+def get_vector(dots: list):
+    return [dots[0], dots[1], dots[2], 1]
 
 
 def ToRadian(angle: float):
@@ -31,16 +35,100 @@ def get_scale_matrix(kx: float = 0, ky: float = 0, kz: float = 0):
 
 
 def get_rotate_matrix_X(angle: float, is_radian: bool = False):
-    pass
+    if not is_radian:
+        angle = ToRadian(angle)
+        
+    return  [[1, 0, 0, 0],
+            [0, cos(angle), -sin(angle), 0],
+            [0, sin(angle), cos(angle), 0],
+            [0, 0, 0, 1]]
 
 
 def get_rotate_matrix_Y(angle: float, is_radian: bool = False):
-    pass
+    if not is_radian:
+        angle = ToRadian(angle)
+
+    return [[cos(angle), 0, sin(angle), 0],
+            [0, 1, 0, 0],
+            [-sin(angle), 0, cos(angle), 0],
+            [0, 0, 0, 1]]
 
 
 def get_rotate_matrix_Z(angle: float, is_radian: bool = False):
-    pass
+    if not is_radian:
+        angle = ToRadian(angle)
+
+    return [[cos(angle), -sin(angle), 0, 0],
+            [sin(angle), cos(angle), 0 , 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]]
 
 
-with open(namefile) as file:
-    pass
+def Bresenham(x0: int, y0: int, x1: int, y1: int, color: tuple = (255, 255, 255)):
+    delta_x = abs(x1 - x0)
+    delta_y = abs(y1 - y0)
+    error = 0
+    diff = 1
+
+    # Смена координат в случае, если начальная координата дальше по оси х, чем конечная
+    if(x0 - x1 > 0):
+        x0, x1 = x1, x0
+        y0, y1 = y1, y0
+
+    # Проверка на убывание
+    if(y0 - y1 > 0):
+        diff = -1
+
+    # Если угол меньше или равно 45, то увеличиваем/уменьшаем координату y
+    if(delta_x >= delta_y):
+        y_i = y0
+        for x in range(x0, x1 + 1):
+            image.putpixel((x, y_i), color)
+            error = error + 2 * delta_y
+            if error >= delta_x:
+                y_i += diff
+                error -= 2 * delta_x
+    # Иначе - по координате x
+    elif(delta_x < delta_y):
+        # Обработка особого случая
+        if(diff == -1):
+            x0, x1 = x1, x0
+            y0, y1 = y1, y0
+        x_i = x0
+        for y in range(y0, y1 + 1):
+            image.putpixel((x_i, y), color)
+            error = error + 2 * delta_x
+            if error >= delta_y:
+                x_i += diff
+                error -= 2 * delta_y
+
+
+dots = []
+figures = []
+
+with open(input("Введите полный путь к файлу: ")) as file:
+    info = file.read().split('\n')
+
+    for line in info:
+        if (line.find("v") == 0):
+            _, *line = line.split()
+            dots.append( list(float(dot) for dot in line) )
+        elif (line.find("f") == 0):
+            _, *line = line.split()
+            figures.append( list(int(fig) for fig in line) )
+
+
+with Image.new("RGB", (300, 300)) as image:
+    for i in range(len(dots)):
+        dots[i] = ChangeVector(get_scale_matrix(20, 20, 20), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_rotate_matrix_Z(180 + 45), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_rotate_matrix_X(45), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_move_matrix(150, 150), get_vector(dots[i]))[:-1]
+
+    for i in range(len(figures)):
+        fig = figures[i]
+        for j in range(-1, len(fig)-1):
+            Bresenham(int(dots[fig[j]-1][0]), int(dots[fig[j]-1][1]), int(dots[fig[j+1]-1][0]), int(dots[fig[j+1]-1][1]))
+
+    plt.imshow(image)
+    plt.show()
