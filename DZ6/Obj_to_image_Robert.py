@@ -15,8 +15,8 @@ def is_visible(fig: list):
     xb, yb, zb = int(xb), int(yb), int(zb)
     xc, yc, zc = int(xc), int(yc), int(zc)
 
-    A = (yb-ya)*(zc-za) - (zb-za)*(yc-ya)
-    B = (xc-xa)*(zb-za) - (xb-xa)*(zc-za)
+    # A = (yb-ya)*(zc-za) - (zb-za)*(yc-ya)
+    # B = (xc-xa)*(zb-za) - (xb-xa)*(zc-za)
     C = (xb-xa)*(yc-ya) - (yb-ya)*(xc-xa)
 
     if (C < 0): return False
