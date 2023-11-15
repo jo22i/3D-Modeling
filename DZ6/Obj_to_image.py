@@ -21,8 +21,9 @@ with open(input("Введите полный путь к файлу: ")) as file
 with Image.new("RGB", (300, 300)) as image:
     for i in range(len(dots)):
         dots[i] = ChangeVector(get_scale_matrix(20, 20, 20), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_rotate_matrix_Z(180+445), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_rotate_matrix_X(55), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_rotate_matrix_Z(180+45), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_rotate_matrix_X(45), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_rotate_matrix_Y(10), get_vector(dots[i]))[:-1]
         dots[i] = ChangeVector(get_move_matrix(150, 150), get_vector(dots[i]))[:-1]
 
     for i in range(len(figures)):
