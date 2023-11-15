@@ -11,14 +11,13 @@ def is_visible(fig: list):
     xb, yb, zb = dots[fig[1]-1][0], dots[fig[1]-1][1], dots[fig[1]-1][2]
     xc, yc, zc = dots[fig[2]-1][0], dots[fig[2]-1][1], dots[fig[2]-1][2]
 
-    a11, a12, a13 = xa, ya, za
-    a22, a23, b2 = (xa*yb-ya*xb), (xa*zb-ya*xb), (xa-xb)
-    a33 = (a22*(xa*zc-za*xc) - a23*(xa*yc-ya*xc))
-    b3 = (a22*(xa-xc) - b2*(xa*yc-ya*xc))
+    xa, ya, za = int(xa), int(ya), int(za)
+    xb, yb, zb = int(xb), int(yb), int(zb)
+    xc, yc, zc = int(xc), int(yc), int(zc)
 
-    A = (a12*(a33*b2 - a23*b3) + a22*(a13*b3 - a33))
-    B = (a11*(a23*b3 - a33*b2))
-    C = -(a11*a22*b3)
+    A = (yb-ya)*(zc-za) - (zb-za)*(yc-ya)
+    B = (xc-xa)*(zb-za) - (xb-xa)*(zc-za)
+    C = (xb-xa)*(yc-ya) - (yb-ya)*(xc-xa)
 
     if (C < 0): return False
 
@@ -40,12 +39,12 @@ with open(input("Введите полный путь к файлу: ")) as file
             figures.append( list(int(fig) for fig in line) )
 
 
-with Image.new("RGB", (150, 150)) as image:
+with Image.new("RGB", (300, 300)) as image:
     for i in range(len(dots)):
-        # dots[i] = ChangeVector(get_scale_matrix(20, 20, 20), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_rotate_matrix_Z(0), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_scale_matrix(20, 20, 20), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_rotate_matrix_Z(180+45), get_vector(dots[i]))[:-1]
         dots[i] = ChangeVector(get_rotate_matrix_X(55), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_move_matrix(75, 75, 75), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_move_matrix(150, 150), get_vector(dots[i]))[:-1]
 
     for i in range(len(figures)):
         fig = figures[i]
