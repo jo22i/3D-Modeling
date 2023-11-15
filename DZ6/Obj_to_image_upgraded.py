@@ -1,6 +1,6 @@
 from PIL import Image
 import matplotlib.pyplot as plt
-import Bresenham
+from Bresenham import Bresenham
 from FigureManip import *
 
 
@@ -51,7 +51,7 @@ with Image.new("RGB", (150, 150)) as image:
         fig = figures[i]
         if (is_visible(fig)):
             for j in range(-1, len(fig)-1):
-                Bresenham(int(dots[fig[j]-1][0]), int(dots[fig[j]-1][1]), int(dots[fig[j+1]-1][0]), int(dots[fig[j+1]-1][1]))
+                Bresenham(image, int(dots[fig[j]-1][0]), int(dots[fig[j]-1][1]), int(dots[fig[j+1]-1][0]), int(dots[fig[j+1]-1][1]))
 
     plt.imshow(image)
     plt.show()

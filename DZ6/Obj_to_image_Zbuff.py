@@ -1,11 +1,11 @@
 from PIL import Image
 import matplotlib.pyplot as plt
-import Bresenham
+from Bresenham import Bresenham
 from FigureManip import *
 
 
-def is_visible(xi: int, yi: int, fig: list):
-    global dots
+def is_visible(xi: int, yi: int):
+    global dots, figures, image
 
     xa, ya, za = dots[fig[0]-1][0], dots[fig[0]-1][1], dots[fig[0]-1][2]
     xb, yb, zb = dots[fig[1]-1][0], dots[fig[1]-1][1], dots[fig[1]-1][2]

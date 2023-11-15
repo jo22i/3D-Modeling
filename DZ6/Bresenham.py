@@ -1,4 +1,4 @@
-def Bresenham(x0: int, y0: int, x1: int, y1: int, color: tuple = (255, 255, 255)):
+def Bresenham(image, x0: int, y0: int, x1: int, y1: int, color: tuple = (255, 255, 255)):
     delta_x = abs(x1 - x0)
     delta_y = abs(y1 - y0)
     error = 0
