@@ -1,6 +1,5 @@
 from PIL import Image
 import matplotlib.pyplot as plt
-from Bresenham import Bresenham
 from FigureManip import *
 
 
@@ -30,36 +29,27 @@ class figure:
 
 def is_in_figure(xi: int, yi: int, fig: figure):
     # Обход вершин идёт по часовой стрелке (стандарт Blender)
+    # Описание векторов фигуры
     abV = tuple((fig.dotB.x - fig.dotA.x), (fig.dotB.y - fig.dotA.y))
     bcV = tuple((fig.dotC.x - fig.dotB.x), (fig.dotC.y - fig.dotB.y))
     caV = tuple((fig.dotA.x - fig.dotC.x), (fig.dotA.y - fig.dotC.y))
 
+    # Описание нормалей векторов фигуры
     Nab = tuple(abV[1], -abV[0])
     Nbc = tuple(bcV[1], -bcV[0])
     Nca = tuple(caV[1], -caV[0])
 
+    # Описание векторов от точек фигуры до исходной точки
     atV = tuple(xi - abV[0], yi - abV[1])
     btV = tuple(xi - bcV[0], yi - bcV[1])
     ctV = tuple(xi - caV[0], yi - caV[1])
 
-    if ((Nab[0]*atV[0] + Nab[1]+atV[1] >= 0) and (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and (Nca[0]*ctV[0] + Nca[1]+ctV[1] >= 0)): return True
+    # Проверка на принадлежность исходной точки данной фигуре
+    if ((Nab[0]*atV[0] + Nab[1]+atV[1] >= 0) and 
+        (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and 
+        (Nca[0]*ctV[0] + Nca[1]+ctV[1] >= 0)): return True
 
     return False
-
-# def is_visible(xi: int, yi: int):
-#     global dots, figures, image
-
-#     xa, ya, za = dots[fig[0]-1][0], dots[fig[0]-1][1], dots[fig[0]-1][2]
-#     xb, yb, zb = dots[fig[1]-1][0], dots[fig[1]-1][1], dots[fig[1]-1][2]
-#     xc, yc, zc = dots[fig[2]-1][0], dots[fig[2]-1][1], dots[fig[2]-1][2]
-
-#     xa, ya, za = int(xa), int(ya), int(za)
-#     xb, yb, zb = int(xb), int(yb), int(zb)
-#     xc, yc, zc = int(xc), int(yc), int(zc)
-
-#     # TO DO: Сделать расчёт принадлежности точки плоскости с помощью векторов нормалей
-
-#     pass
 
 
 dots = []
@@ -68,6 +58,7 @@ figures = []
 with open(input("Введите полный путь к файлу: ")) as file:
     info = file.read().split('\n')
 
+    # TO DO: Найти как экспортировать цвет каждого полигона в формате RGB
     for line in info:
         if (line.find("v") == 0):
             _, *line = line.split()
@@ -82,11 +73,28 @@ with Image.new("RGB", (300, 300)) as image:
         dots[i] = ChangeVector(get_rotate_matrix_Z(180+445), get_vector(dots[i]))[:-1]
         dots[i] = ChangeVector(get_rotate_matrix_X(55), get_vector(dots[i]))[:-1]
         dots[i] = ChangeVector(get_move_matrix(150, 150), get_vector(dots[i]))[:-1]
+        dots[i] = dot(int(dots[i][0]), int(dots[i][1]), int(dots[i][2]))
 
     for i in range(len(figures)):
-        fig = figures[i]
-        for j in range(-1, len(fig)-1):
-            Bresenham(int(dots[fig[j]-1][0]), int(dots[fig[j]-1][1]), int(dots[fig[j+1]-1][0]), int(dots[fig[j+1]-1][1]))
+        # TO DO: Понять как подвязать цвет из TO DO выше
+        figures[i] = figure(dots[figures[i][0]-1], dots[figures[i][1]-1], dots[figures[i][2]-1], colour)
+        # fig = figures[i]
+        # for j in range(-1, len(fig)-1):
+        #     Bresenham(int(dots[fig[j]-1][0]), int(dots[fig[j]-1][1]), int(dots[fig[j+1]-1][0]), int(dots[fig[j+1]-1][1]))
+
+
+    # Z-буфер с доступом к элементам по схеме [y*width + x]
+    Zbuff = [None]*image.width*image.height
+    for X in range(image.width):
+        for Y in range(image.height):
+            for i in range(len(figures)):
+                if (is_in_figure(X, Y, figures[i])): 
+                    if (Zbuff[image.width*Y + X] is None or Zbuff[image.width*Y + X].z < figures[i].z):
+                        Zbuff[image.width*Y + X] = figures[i]
+
+    for i in range(len(Zbuff)):
+        if Zbuff[i] is not None:
+            image.putpixel((Zbuff[i].x, Zbuff[i].y), Zbuff[i].colour)
 
     plt.imshow(image)
     plt.show()
