@@ -1,6 +1,10 @@
 from PIL import Image
 import matplotlib.pyplot as plt
 from FigureManip import *
+import random
+import time
+
+random.seed(time.time)
 
 
 class dot:
@@ -30,19 +34,19 @@ class figure:
 def is_in_figure(xi: int, yi: int, fig: figure):
     # Обход вершин идёт по часовой стрелке (стандарт Blender)
     # Описание векторов фигуры
-    abV = tuple((fig.dotB.x - fig.dotA.x), (fig.dotB.y - fig.dotA.y))
-    bcV = tuple((fig.dotC.x - fig.dotB.x), (fig.dotC.y - fig.dotB.y))
-    caV = tuple((fig.dotA.x - fig.dotC.x), (fig.dotA.y - fig.dotC.y))
+    abV = tuple([(fig.dotB.x - fig.dotA.x), (fig.dotB.y - fig.dotA.y)])
+    bcV = tuple([(fig.dotC.x - fig.dotB.x), (fig.dotC.y - fig.dotB.y)])
+    caV = tuple([(fig.dotA.x - fig.dotC.x), (fig.dotA.y - fig.dotC.y)])
 
     # Описание нормалей векторов фигуры
-    Nab = tuple(abV[1], -abV[0])
-    Nbc = tuple(bcV[1], -bcV[0])
-    Nca = tuple(caV[1], -caV[0])
+    Nab = tuple([abV[1], -abV[0]])
+    Nbc = tuple([bcV[1], -bcV[0]])
+    Nca = tuple([caV[1], -caV[0]])
 
     # Описание векторов от точек фигуры до исходной точки
-    atV = tuple(xi - abV[0], yi - abV[1])
-    btV = tuple(xi - bcV[0], yi - bcV[1])
-    ctV = tuple(xi - caV[0], yi - caV[1])
+    atV = tuple([xi - abV[0], yi - abV[1]])
+    btV = tuple([xi - bcV[0], yi - bcV[1]])
+    ctV = tuple([xi - caV[0], yi - caV[1]])
 
     # Проверка на принадлежность исходной точки данной фигуре
     if ((Nab[0]*atV[0] + Nab[1]+atV[1] >= 0) and 
@@ -67,17 +71,19 @@ with open(input("Введите полный путь к файлу: ")) as file
             _, *line = line.split()
             figures.append( list(int(fig) for fig in line) )
 
-with Image.new("RGB", (300, 300)) as image:
+with Image.new("RGB", (100, 100)) as image:
     for i in range(len(dots)):
-        dots[i] = ChangeVector(get_scale_matrix(20, 20, 20), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_rotate_matrix_Z(180+445), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_rotate_matrix_X(55), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_move_matrix(150, 150), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_scale_matrix(30, 30, 30), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_rotate_matrix_Z(30), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_rotate_matrix_X(70), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_move_matrix(50, 50), get_vector(dots[i]))[:-1]
         dots[i] = dot(int(dots[i][0]), int(dots[i][1]), int(dots[i][2]))
 
     for i in range(len(figures)):
         # TO DO: Понять как подвязать цвет из TO DO выше
-        figures[i] = figure(dots[figures[i][0]-1], dots[figures[i][1]-1], dots[figures[i][2]-1], colour)
+        figures[i] = figure(dots[figures[i][0]-1], dots[figures[i][1]-1],
+                            dots[figures[i][2]-1],
+                            tuple([random.randrange(255+1), random.randrange(255+1), random.randrange(255+1)]))
         # fig = figures[i]
         # for j in range(-1, len(fig)-1):
         #     Bresenham(int(dots[fig[j]-1][0]), int(dots[fig[j]-1][1]), int(dots[fig[j+1]-1][0]), int(dots[fig[j+1]-1][1]))
