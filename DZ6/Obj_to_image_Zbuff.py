@@ -1,3 +1,4 @@
+from typing import Any
 from PIL import Image
 import matplotlib.pyplot as plt
 from FigureManip import *
@@ -8,18 +9,10 @@ random.seed(time.time)
 
 
 class dot:
-    def __init__(self, cordX: int, cordY: int, cordZ: int):
+    def __init__(self, cordX: float, cordY: float, cordZ: float):
         self.x = cordX
         self.y = cordY
         self.z = cordZ
-
-
-def get_normal(A: dot, B: dot, C: dot):
-    coefA = (B.y-A.y)*(C.z-A.z) - (B.z-A.z)*(C.y-A.y)
-    coefB = (C.x-A.x)*(B.z-A.z) - (B.x-A.x)*(C.z-A.z)
-    coefC = (B.x-A.x)*(C.y-A.y) - (B.y-A.y)*(C.x-A.x)
-
-    return tuple([coefA, coefB, coefC])
 
 
 class figure:
@@ -28,36 +21,43 @@ class figure:
         self.dotB = dotB
         self.dotC = dotC
         self.colour = colour
-        self.normalV = get_normal(self.dotA, self.dotB, self.dotC)
+        
+    def getZ(self, xi: int, yi: int):
+        # Ax + By + Cz + D = 0
+        coefA = 
+        coefB = 
+        coefC = 
+        coefD = 
+
+        return (-coefA*xi - coefB*yi - coefD)/coefC
+
+    def in_figure(self, xi: int, yi: int):
+        # Обход вершин идёт по часовой стрелке (стандарт Blender)
+        # Описание векторов фигуры
+        abV = tuple([(self.dotB.x - self.dotA.x), (self.dotB.y - self.dotA.y)])
+        bcV = tuple([(self.dotC.x - self.dotB.x), (self.dotC.y - self.dotB.y)])
+        caV = tuple([(self.dotA.x - self.dotC.x), (self.dotA.y - self.dotC.y)])
+
+        # Описание нормалей векторов фигуры
+        Nab = tuple([abV[1], -abV[0]])
+        Nbc = tuple([bcV[1], -bcV[0]])
+        Nca = tuple([caV[1], -caV[0]])
+
+        # Описание векторов от точек фигуры до исходной точки
+        atV = tuple([xi - abV[0], yi - abV[1]])
+        btV = tuple([xi - bcV[0], yi - bcV[1]])
+        ctV = tuple([xi - caV[0], yi - caV[1]])
+
+        # Проверка на принадлежность исходной точки данной фигуре
+        if ((Nab[0]*atV[0] + Nab[1]+atV[1] >= 0) and 
+            (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and 
+            (Nca[0]*ctV[0] + Nca[1]+ctV[1] >= 0)): return True
+
+        return False
 
 
-def is_in_figure(xi: int, yi: int, fig: figure):
-    # Обход вершин идёт по часовой стрелке (стандарт Blender)
-    # Описание векторов фигуры
-    abV = tuple([(fig.dotB.x - fig.dotA.x), (fig.dotB.y - fig.dotA.y)])
-    bcV = tuple([(fig.dotC.x - fig.dotB.x), (fig.dotC.y - fig.dotB.y)])
-    caV = tuple([(fig.dotA.x - fig.dotC.x), (fig.dotA.y - fig.dotC.y)])
-
-    # Описание нормалей векторов фигуры
-    Nab = tuple([abV[1], -abV[0]])
-    Nbc = tuple([bcV[1], -bcV[0]])
-    Nca = tuple([caV[1], -caV[0]])
-
-    # Описание векторов от точек фигуры до исходной точки
-    atV = tuple([xi - abV[0], yi - abV[1]])
-    btV = tuple([xi - bcV[0], yi - bcV[1]])
-    ctV = tuple([xi - caV[0], yi - caV[1]])
-
-    # Проверка на принадлежность исходной точки данной фигуре
-    if ((Nab[0]*atV[0] + Nab[1]+atV[1] >= 0) and 
-        (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and 
-        (Nca[0]*ctV[0] + Nca[1]+ctV[1] >= 0)): return True
-
-    return False
-
-
-dots = []
-figures = []
+dots = [dot]
+figures = [figure]
 
 with open(input("Введите полный путь к файлу: ")) as file:
     info = file.read().split('\n')
@@ -84,23 +84,18 @@ with Image.new("RGB", (100, 100)) as image:
         figures[i] = figure(dots[figures[i][0]-1], dots[figures[i][1]-1],
                             dots[figures[i][2]-1],
                             tuple([random.randrange(255+1), random.randrange(255+1), random.randrange(255+1)]))
-        # fig = figures[i]
-        # for j in range(-1, len(fig)-1):
-        #     Bresenham(int(dots[fig[j]-1][0]), int(dots[fig[j]-1][1]), int(dots[fig[j+1]-1][0]), int(dots[fig[j+1]-1][1]))
 
-
-    # Z-буфер с доступом к элементам по схеме [y*width + x]
-    Zbuff = [None]*image.width*image.height
+    # Проход по всей плоскости и вычисление видимой части фигуры
     for X in range(image.width):
         for Y in range(image.height):
+            current_fig = None
             for i in range(len(figures)):
-                if (is_in_figure(X, Y, figures[i])): 
-                    if (Zbuff[image.width*Y + X] is None or Zbuff[image.width*Y + X].z < figures[i].z):
-                        Zbuff[image.width*Y + X] = figures[i]
+                if figures[i].in_figure():
+                    if (current_fig is None or current_fig.getZ() < figures[i].getZ()):
+                        current_fig = figures[i]
 
-    for i in range(len(Zbuff)):
-        if Zbuff[i] is not None:
-            image.putpixel((Zbuff[i].x, Zbuff[i].y), Zbuff[i].colour)
+            if current_fig is not None:
+                image.putpixel((X, Y), current_fig.colour)
 
     plt.imshow(image)
     plt.show()
