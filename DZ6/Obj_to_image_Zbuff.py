@@ -2,8 +2,7 @@ from typing import Any
 from PIL import Image
 import matplotlib.pyplot as plt
 from FigureManip import *
-import random
-import time
+import random, time
 
 random.seed(time.time)
 
@@ -24,10 +23,10 @@ class figure:
         
     def getZ(self, xi: int, yi: int):
         # Ax + By + Cz + D = 0
-        coefA = 
-        coefB = 
-        coefC = 
-        coefD = 
+        coefA = (self.dotB.y - self.dotA.y)*(self.dotC.z - self.dotA.z) - (self.dotB.z - self.dotA.z)*(self.dotC.y - self.dotA.y)
+        coefB = (self.dotB.z - self.dotA.z)*(self.dotC.x - self.dotA.x) - (self.dotB.x - self.dotA.x)*(self.dotC.z - self.dotA.z)
+        coefC = (self.dotB.x - self.dotA.x)*(self.dotC.y - self.dotA.y) - (self.dotB.y - self.dotA.y)*(self.dotC.x - self.dotA.x)
+        coefD = -self.dotA.x*coefA + self.dotA.y*coefB - self.dotA.z*coefC
 
         return (-coefA*xi - coefB*yi - coefD)/coefC
 
@@ -56,8 +55,8 @@ class figure:
         return False
 
 
-dots = [dot]
-figures = [figure]
+dots = []
+figures = []
 
 with open(input("Введите полный путь к файлу: ")) as file:
     info = file.read().split('\n')
@@ -80,18 +79,18 @@ with Image.new("RGB", (100, 100)) as image:
         dots[i] = dot(int(dots[i][0]), int(dots[i][1]), int(dots[i][2]))
 
     for i in range(len(figures)):
-        # TO DO: Понять как подвязать цвет из TO DO выше
         figures[i] = figure(dots[figures[i][0]-1], dots[figures[i][1]-1],
                             dots[figures[i][2]-1],
                             tuple([random.randrange(255+1), random.randrange(255+1), random.randrange(255+1)]))
+        print(str(i) + " = " + str(figures[i].colour))
 
     # Проход по всей плоскости и вычисление видимой части фигуры
     for X in range(image.width):
         for Y in range(image.height):
             current_fig = None
             for i in range(len(figures)):
-                if figures[i].in_figure():
-                    if (current_fig is None or current_fig.getZ() < figures[i].getZ()):
+                if figures[i].in_figure(X, Y):
+                    if (current_fig is None or current_fig.getZ(X, Y) < figures[i].getZ(X, Y)):
                         current_fig = figures[i]
 
             if current_fig is not None:
