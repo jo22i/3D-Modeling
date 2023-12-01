@@ -39,12 +39,17 @@ with open(input("Введите полный путь к файлу: ")) as file
             figures.append( list(int(fig) for fig in line) )
 
 
-with Image.new("RGB", (100, 100)) as image:
+with Image.new("RGB", (26, 26)) as image:
+    for x in range(0, image.width):
+        for y in range(0, image.height):
+            if(x%2 == y%2):
+                image.putpixel((x, y), (54, 54, 54))
+
     for i in range(len(dots)):
-        dots[i] = ChangeVector(get_scale_matrix(35, 35, 35), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_scale_matrix(15, 15, 15), get_vector(dots[i]))[:-1]
         dots[i] = ChangeVector(get_rotate_matrix_Z(35), get_vector(dots[i]))[:-1]
         dots[i] = ChangeVector(get_rotate_matrix_X(55), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_move_matrix(50, 50), get_vector(dots[i]))[:-1]
+        dots[i] = ChangeVector(get_move_matrix(13, 13), get_vector(dots[i]))[:-1]
 
     for i in range(len(figures)):
         fig = figures[i]

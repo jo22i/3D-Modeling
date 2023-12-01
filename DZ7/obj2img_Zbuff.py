@@ -4,7 +4,7 @@ from DotManip import *
 import random, time
 from math import sqrt
 
-random.seed(time.time)
+random.seed(time.time())
 
 class figure:
     def __init__(self, dotA: dot, dotB: dot, dotC: dot, colour: tuple):
@@ -35,46 +35,45 @@ class figure:
 
         # return False
 
-        A = (self.dotB.x - self.dotA.x)**2 + (self.dotB.y - self.dotA.y)**2
-        B = (self.dotC.x - self.dotB.x)**2 + (self.dotC.y - self.dotB.y)**2
-        C = (self.dotC.x - self.dotA.x)**2 + (self.dotC.y - self.dotA.y)**2
+        # A = (self.dotB.x - self.dotA.x)**2 + (self.dotB.y - self.dotA.y)**2
+        # B = (self.dotC.x - self.dotB.x)**2 + (self.dotC.y - self.dotB.y)**2
+        # C = (self.dotC.x - self.dotA.x)**2 + (self.dotC.y - self.dotA.y)**2
 
-        tA = (xt - self.dotA.x)**2 + (yt - self.dotA.y)**2
-        tB = (xt - self.dotB.x)**2 + (yt - self.dotB.y)**2
-        tC = (xt - self.dotC.x)**2 + (yt - self.dotC.y)**2
+        # tA = (xt - self.dotA.x)**2 + (yt - self.dotA.y)**2
+        # tB = (xt - self.dotB.x)**2 + (yt - self.dotB.y)**2
+        # tC = (xt - self.dotC.x)**2 + (yt - self.dotC.y)**2
 
-        Sabc = sqrt(4*A*B - (A + B - C)**2)
-        Sabt = sqrt(4*A*tB - (A + tB - tA)**2)
-        Sbct = sqrt(4*B*tC - (B + tC - tB)**2)
-        Sact = sqrt(4*C*tA - (C + tA - tC)**2)
+        # Sabc = sqrt(4*A*B - (A + B - C)**2)
+        # Sabt = sqrt(4*A*tB - (A + tB - tA)**2)
+        # Sbct = sqrt(4*B*tC - (B + tC - tB)**2)
+        # Sact = sqrt(4*C*tA - (C + tA - tC)**2)
 
-        if (Sabc == Sabt + Sbct + Sact): return True
+        # if (Sabc == Sabt + Sbct + Sact): return True
+
+        # return False
+
+        # Обход вершин идёт по часовой стрелке (стандарт Blender)
+        # Описание векторов фигуры
+        abV = tuple([(self.dotB.x - self.dotA.x), (self.dotB.y - self.dotA.y)])
+        bcV = tuple([(self.dotC.x - self.dotB.x), (self.dotC.y - self.dotB.y)])
+        caV = tuple([(self.dotA.x - self.dotC.x), (self.dotA.y - self.dotC.y)])
+
+        # Описание нормалей векторов фигуры
+        Nab = tuple([abV[1], -abV[0]])
+        Nbc = tuple([bcV[1], -bcV[0]])
+        Nca = tuple([caV[1], -caV[0]])
+
+        # Описание векторов от точек фигуры до исходной точки
+        atV = tuple([xt - self.dotA.x, yt - self.dotA.y])
+        btV = tuple([xt - self.dotB.x, yt - self.dotB.y])
+        ctV = tuple([xt - self.dotC.x, yt - self.dotC.y])
+
+        # Проверка на принадлежность исходной точки данной фигуре
+        if ((Nab[0]*atV[0] + Nab[1]*atV[1] >= 0) and 
+            (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and 
+            (Nca[0]*ctV[0] + Nca[1]*ctV[1] >= 0)): return True
 
         return False
-
-    # def in_figure(self, xi: int, yi: int):
-    #     # Обход вершин идёт по часовой стрелке (стандарт Blender)
-    #     # Описание векторов фигуры
-    #     abV = tuple([(self.dotB.x - self.dotA.x), (self.dotB.y - self.dotA.y)])
-    #     bcV = tuple([(self.dotC.x - self.dotB.x), (self.dotC.y - self.dotB.y)])
-    #     caV = tuple([(self.dotA.x - self.dotC.x), (self.dotA.y - self.dotC.y)])
-
-    #     # Описание нормалей векторов фигуры
-    #     Nab = tuple([abV[1], -abV[0]])
-    #     Nbc = tuple([bcV[1], -bcV[0]])
-    #     Nca = tuple([caV[1], -caV[0]])
-
-    #     # Описание векторов от точек фигуры до исходной точки
-    #     atV = tuple([xi - abV[0], yi - abV[1]])
-    #     btV = tuple([xi - bcV[0], yi - bcV[1]])
-    #     ctV = tuple([xi - caV[0], yi - caV[1]])
-
-    #     # Проверка на принадлежность исходной точки данной фигуре
-    #     if ((Nab[0]*atV[0] + Nab[1]+atV[1] >= 0) and 
-    #         (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and 
-    #         (Nca[0]*ctV[0] + Nca[1]+ctV[1] >= 0)): return True
-
-    #     return False
 
 
 dots = []

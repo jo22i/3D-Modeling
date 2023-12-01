@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from DotManip import *
 import random, time
 
-random.seed(time.time)
+random.seed(time.time())
 
 class figure:
     def __init__(self, dotA: dot, dotB: dot, dotC: dot, colour: tuple):
@@ -34,14 +34,14 @@ class figure:
         Nca = tuple([caV[1], -caV[0]])
 
         # Описание векторов от точек фигуры до исходной точки
-        atV = tuple([xi - abV[0], yi - abV[1]])
-        btV = tuple([xi - bcV[0], yi - bcV[1]])
-        ctV = tuple([xi - caV[0], yi - caV[1]])
+        atV = tuple([xi - self.dotA.x, yi - self.dotA.y])
+        btV = tuple([xi - self.dotB.x, yi - self.dotB.y])
+        ctV = tuple([xi - self.dotC.x, yi - self.dotC.y])
 
         # Проверка на принадлежность исходной точки данной фигуре
-        if ((Nab[0]*atV[0] + Nab[1]+atV[1] >= 0) and 
+        if ((Nab[0]*atV[0] + Nab[1]*atV[1] >= 0) and 
             (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and 
-            (Nca[0]*ctV[0] + Nca[1]+ctV[1] >= 0)): return True
+            (Nca[0]*ctV[0] + Nca[1]*ctV[1] >= 0)): return True
 
         return False
 
@@ -74,31 +74,38 @@ with open(input("Введите полный путь к файлу: ")) as file
             dots.append(D)
         elif (line.find("f") == 0):
             _, *line = line.split()
-            line = list(int(fig) for fig in line)
-            figures.append( figure(dots[line[0]-1], dots[line[0]-1], dots[line[0]-1], tuple([random.randrange(255+1), random.randrange(255+1), random.randrange(255+1)])) )
+            figures.append( list(int(fig) for fig in line) )
 
-with Image.new("RGB", (100, 100)) as image:
+with Image.new("RGB", (26, 26)) as image:
+    for x in range(0, image.width):
+        for y in range(0, image.height):
+            if(x%2 == y%2):
+                image.putpixel((x, y), (54, 54, 54))
+
     for i in range(len(dots)):
-        dots[i] = ChangeDot(get_scale_matrix(35, 35, 35), get_vector(dots[i]))
+        dots[i] = ChangeDot(get_scale_matrix(15, 15, 15), get_vector(dots[i]))
         dots[i] = ChangeDot(get_rotate_matrix_Z(35), get_vector(dots[i]))
         dots[i] = ChangeDot(get_rotate_matrix_X(55), get_vector(dots[i]))
-        dots[i] = ChangeDot(get_move_matrix(50, 50), get_vector(dots[i]))
+        dots[i] = ChangeDot(get_move_matrix(13, 13), get_vector(dots[i]))
         xmin = int(min(xmin, dots[i].x))
         xmax = int(max(xmax, dots[i].x))
         ymin = int(min(ymin, dots[i].y))
         ymax = int(max(ymax, dots[i].y))
 
     for i in range(len(figures)):
-        fig = figures.pop()
-        if fig.is_visible(): figures.append(fig)
-        print(str(i) + " = " + str(figures[i].colour))
-
+        fig = figure(dots[figures[i][0]-1], dots[figures[i][1]-1], dots[figures[i][2]-1], tuple([random.randrange(255+1), random.randrange(255+1), random.randrange(255+1)]))
+        if fig.is_visible():
+            figures[i] = fig
+            print(str(i) + " = " + str(figures[i].colour))
+        else:
+            figures[i] = None
+    
     # Проход по всей плоскости и вычисление видимой части фигуры
     for X in range(xmin, xmax+1):
         for Y in range(ymin, ymax+1):
             current_fig = None
             for i in range(len(figures)):
-                if figures[i].in_figure(X, Y):
+                if figures[i] is not None and figures[i].in_figure(X, Y):
                     if ((current_fig is None) or (current_fig.getZ(X, Y) < figures[i].getZ(X, Y))):
                         current_fig = figures[i]
 
