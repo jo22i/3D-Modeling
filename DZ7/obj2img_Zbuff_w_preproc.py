@@ -21,29 +21,40 @@ class figure:
 
         return (-coefA*xi - coefB*yi - coefD)/coefC
 
-    def in_figure(self, xi: int, yi: int):
-        # Обход вершин идёт по часовой стрелке (стандарт Blender)
-        # Описание векторов фигуры
-        abV = tuple([(self.dotB.x - self.dotA.x), (self.dotB.y - self.dotA.y)])
-        bcV = tuple([(self.dotC.x - self.dotB.x), (self.dotC.y - self.dotB.y)])
-        caV = tuple([(self.dotA.x - self.dotC.x), (self.dotA.y - self.dotC.y)])
+    def in_figure(self, xt: int, yt: int):
+        # Принадлежность точки находится через площади треугольников
+        # Sabc = 0.5 * abs( (x1 - x3)*(y2 - y3) - (x2 - x3)*(y1 - y3) )
 
-        # Описание нормалей векторов фигуры
-        Nab = tuple([abV[1], -abV[0]])
-        Nbc = tuple([bcV[1], -bcV[0]])
-        Nca = tuple([caV[1], -caV[0]])
-
-        # Описание векторов от точек фигуры до исходной точки
-        atV = tuple([xi - self.dotA.x, yi - self.dotA.y])
-        btV = tuple([xi - self.dotB.x, yi - self.dotB.y])
-        ctV = tuple([xi - self.dotC.x, yi - self.dotC.y])
-
-        # Проверка на принадлежность исходной точки данной фигуре
-        if ((Nab[0]*atV[0] + Nab[1]*atV[1] >= 0) and 
-            (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and 
-            (Nca[0]*ctV[0] + Nca[1]*ctV[1] >= 0)): return True
+        Sabc = abs( (self.dotA.x - self.dotC.x)*(self.dotB.y - self.dotC.y) - (self.dotB.x - self.dotC.x)*(self.dotA.y - self.dotC.y) )
+        Sabt = abs( (self.dotA.x - xt)*(self.dotB.y - yt) - (self.dotB.x - xt)*(self.dotA.y - yt) )
+        Sbct = abs( (self.dotB.x - xt)*(self.dotC.y - yt) - (self.dotC.x - xt)*(self.dotB.y - yt) )
+        Sact = abs( (self.dotA.x - xt)*(self.dotC.y - yt) - (self.dotC.x - xt)*(self.dotA.y - yt) )
+        
+        if Sabc == Sabt + Sbct + Sact: return True
 
         return False
+        # # Обход вершин идёт по часовой стрелке (стандарт Blender)
+        # # Описание векторов фигуры
+        # abV = tuple([(self.dotB.x - self.dotA.x), (self.dotB.y - self.dotA.y)])
+        # bcV = tuple([(self.dotC.x - self.dotB.x), (self.dotC.y - self.dotB.y)])
+        # caV = tuple([(self.dotA.x - self.dotC.x), (self.dotA.y - self.dotC.y)])
+
+        # # Описание нормалей векторов фигуры
+        # Nab = tuple([abV[1], -abV[0]])
+        # Nbc = tuple([bcV[1], -bcV[0]])
+        # Nca = tuple([caV[1], -caV[0]])
+
+        # # Описание векторов от точек фигуры до исходной точки
+        # atV = tuple([xi - self.dotA.x, yi - self.dotA.y])
+        # btV = tuple([xi - self.dotB.x, yi - self.dotB.y])
+        # ctV = tuple([xi - self.dotC.x, yi - self.dotC.y])
+
+        # # Проверка на принадлежность исходной точки данной фигуре
+        # if ((Nab[0]*atV[0] + Nab[1]*atV[1] >= 0) and 
+        #     (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and 
+        #     (Nca[0]*ctV[0] + Nca[1]*ctV[1] >= 0)): return True
+
+        # return False
 
     def is_visible(self):
         # A = (yb-ya)*(zc-za) - (zb-za)*(yc-ya)
@@ -70,8 +81,7 @@ with open(input("Введите полный путь к файлу: ")) as file
         if (line.find("v") == 0):
             _, *line = line.split()
             line = list(float(dot) for dot in line)
-            D = dot(line[0], line[1], line[2])
-            dots.append(D)
+            dots.append( dot(line[0], line[1], line[2]))
         elif (line.find("f") == 0):
             _, *line = line.split()
             figures.append( list(int(fig) for fig in line) )

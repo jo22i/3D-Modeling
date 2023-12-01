@@ -23,17 +23,17 @@ class figure:
         return (-coefA*xi - coefB*yi - coefD)/coefC
 
     def in_figure(self, xt: int, yt: int):
-        # # Принадлежность точки находится через площади треугольников
-        # # Sabc = 0.5 * abs( (x2 - x1)*(y3 - y1) - (x3 - x1)*(y2 - y1) )
+        # Принадлежность точки находится через площади треугольников
+        # Sabc = 0.5 * abs( (x1 - x3)*(y2 - y3) - (x2 - x3)*(y1 - y3) )
 
-        # Sabc = 0.5 * abs( (self.dotB.x - self.dotA.x)*(self.dotC.y - self.dotA.y) - (self.dotC.x - self.dotA.x)*(self.dotB.y - self.dotA.y) )
-        # Sabt = 0.5 * abs( (self.dotB.x - self.dotA.x)*(yt - self.dotA.y) - (xt - self.dotA.x)*(self.dotB.y - self.dotA.y) )
-        # Sbct = 0.5 * abs( (self.dotC.x - self.dotB.x)*(yt - self.dotB.y) - (xt - self.dotB.x)*(self.dotC.y - self.dotB.y) )
-        # Sact = 0.5 * abs( (self.dotC.x - self.dotA.x)*(yt - self.dotA.y - (xt - self.dotA.x)*(self.dotC.y - self.dotA.y) ) )
+        Sabc = abs( (self.dotA.x - self.dotC.x)*(self.dotB.y - self.dotC.y) - (self.dotB.x - self.dotC.x)*(self.dotA.y - self.dotC.y) )
+        Sabt = abs( (self.dotA.x - xt)*(self.dotB.y - yt) - (self.dotB.x - xt)*(self.dotA.y - yt) )
+        Sbct = abs( (self.dotB.x - xt)*(self.dotC.y - yt) - (self.dotC.x - xt)*(self.dotB.y - yt) )
+        Sact = abs( (self.dotA.x - xt)*(self.dotC.y - yt) - (self.dotC.x - xt)*(self.dotA.y - yt) )
         
-        # if Sabc == Sabt + Sbct + Sact: return True
+        if Sabc >= Sabt + Sbct + Sact: return True
 
-        # return False
+        return False
 
         # A = (self.dotB.x - self.dotA.x)**2 + (self.dotB.y - self.dotA.y)**2
         # B = (self.dotC.x - self.dotB.x)**2 + (self.dotC.y - self.dotB.y)**2
@@ -85,26 +85,27 @@ ymin, ymax = 100, 0
 with open(input("Введите полный путь к файлу: ")) as file:
     info = file.read().split('\n')
 
-    # TO DO: Найти как экспортировать цвет каждого полигона в формате RGB
     for line in info:
         if (line.find("v") == 0):
             _, *line = line.split()
-            dots.append( list(float(dot) for dot in line) )
+            line = list(float(dot) for dot in line)
+            D = dot(line[0], line[1], line[2])
+            dots.append(D)
         elif (line.find("f") == 0):
             _, *line = line.split()
             figures.append( list(int(fig) for fig in line) )
 
+    
 with Image.new("RGB", (100, 100)) as image:
     for i in range(len(dots)):
-        dots[i] = ChangeVector(get_scale_matrix(35, 35, 35), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_rotate_matrix_Z(35), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_rotate_matrix_X(55), get_vector(dots[i]))[:-1]
-        dots[i] = ChangeVector(get_move_matrix(50, 50), get_vector(dots[i]))[:-1]
-        xmin = int(min(xmin, dots[i][0]))
-        xmax = int(max(xmax, dots[i][0]))
-        ymin = int(min(ymin, dots[i][1]))
-        ymax = int(max(ymax, dots[i][1]))
-        dots[i] = dot(dots[i][0], dots[i][1], dots[i][2])
+        dots[i] = ChangeDot(get_scale_matrix(35, 35, 35), get_vector(dots[i]))
+        dots[i] = ChangeDot(get_rotate_matrix_Z(35), get_vector(dots[i]))
+        dots[i] = ChangeDot(get_rotate_matrix_X(55), get_vector(dots[i]))
+        dots[i] = ChangeDot(get_move_matrix(50, 50), get_vector(dots[i]))
+        xmin = int(min(xmin, dots[i].x))
+        xmax = int(max(xmax, dots[i].x))
+        ymin = int(min(ymin, dots[i].y))
+        ymax = int(max(ymax, dots[i].y))
 
     for i in range(len(figures)):
         figures[i] = figure(dots[figures[i][0]-1], dots[figures[i][1]-1],
