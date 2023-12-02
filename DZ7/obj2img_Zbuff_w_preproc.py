@@ -17,7 +17,7 @@ class figure:
         coefA = (self.dotB.y - self.dotA.y)*(self.dotC.z - self.dotA.z) - (self.dotB.z - self.dotA.z)*(self.dotC.y - self.dotA.y)
         coefB = (self.dotB.z - self.dotA.z)*(self.dotC.x - self.dotA.x) - (self.dotB.x - self.dotA.x)*(self.dotC.z - self.dotA.z)
         coefC = (self.dotB.x - self.dotA.x)*(self.dotC.y - self.dotA.y) - (self.dotB.y - self.dotA.y)*(self.dotC.x - self.dotA.x)
-        coefD = -self.dotA.x*coefA + self.dotA.y*coefB - self.dotA.z*coefC
+        coefD = -self.dotA.x*coefA - self.dotA.y*coefB - self.dotA.z*coefC
 
         return (-coefA*xi - coefB*yi - coefD)/coefC
 

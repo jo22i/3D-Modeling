@@ -18,7 +18,7 @@ class figure:
         coefA = (self.dotB.y - self.dotA.y)*(self.dotC.z - self.dotA.z) - (self.dotB.z - self.dotA.z)*(self.dotC.y - self.dotA.y)
         coefB = (self.dotB.z - self.dotA.z)*(self.dotC.x - self.dotA.x) - (self.dotB.x - self.dotA.x)*(self.dotC.z - self.dotA.z)
         coefC = (self.dotB.x - self.dotA.x)*(self.dotC.y - self.dotA.y) - (self.dotB.y - self.dotA.y)*(self.dotC.x - self.dotA.x)
-        coefD = -self.dotA.x*coefA + self.dotA.y*coefB - self.dotA.z*coefC
+        coefD = -self.dotA.x*coefA - self.dotA.y*coefB - self.dotA.z*coefC
 
         if coefC != 0:
             return (-coefA*xi - coefB*yi - coefD)/coefC
@@ -82,17 +82,17 @@ with open(input("Введите полный путь к файлу: ")) as file
             figures.append( list(int(fig) for fig in line) )
 
     
-with Image.new("RGB", (26, 26)) as image:
+with Image.new("RGB", (100, 100)) as image:
     for x in range(0, image.width):
         for y in range(0, image.height):
             if(x%2 == y%2):
                 image.putpixel((x, y), (54, 54, 54))
 
     for i in range(len(dots)):
-        dots[i] = ChangeDot(get_scale_matrix(15, 15, 15), get_vector(dots[i]))
+        dots[i] = ChangeDot(get_scale_matrix(40, 40, 40), get_vector(dots[i]))
         dots[i] = ChangeDot(get_rotate_matrix_Z(35), get_vector(dots[i]))
         dots[i] = ChangeDot(get_rotate_matrix_X(55), get_vector(dots[i]))
-        dots[i] = ChangeDot(get_move_matrix(13, 13), get_vector(dots[i]))
+        dots[i] = ChangeDot(get_move_matrix(50, 50), get_vector(dots[i]))
         xmin = int(min(xmin, dots[i].x))
         xmax = int(max(xmax, dots[i].x))
         ymin = int(min(ymin, dots[i].y))

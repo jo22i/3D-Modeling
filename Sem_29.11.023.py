@@ -24,12 +24,12 @@ class figure:
         coefA = (self.dotB.y - self.dotA.y)*(self.dotC.z - self.dotA.z) - (self.dotB.z - self.dotA.z)*(self.dotC.y - self.dotA.y)
         coefB = (self.dotB.z - self.dotA.z)*(self.dotC.x - self.dotA.x) - (self.dotB.x - self.dotA.x)*(self.dotC.z - self.dotA.z)
         coefC = (self.dotB.x - self.dotA.x)*(self.dotC.y - self.dotA.y) - (self.dotB.y - self.dotA.y)*(self.dotC.x - self.dotA.x)
-        coefD = -self.dotA.x*coefA + self.dotA.y*coefB - self.dotA.z*coefC
+        coefD = -self.dotA.x*coefA - self.dotA.y*coefB - self.dotA.z*coefC
 
         return (-coefA*xi - coefB*yi - coefD)/coefC
 
     def isIn(self, xt: int, yt: int):
-        # Обход вершин идёт по часовой стрелке (стандарт Blender)
+        # Проверка будет производиться для обоих обходов
         # Описание векторов фигуры
         abV = tuple([(self.dotB.x - self.dotA.x), (self.dotB.y - self.dotA.y)])
         bcV = tuple([(self.dotC.x - self.dotB.x), (self.dotC.y - self.dotB.y)])
@@ -41,14 +41,26 @@ class figure:
         Nca = tuple([caV[1], -caV[0]])
 
         # Описание векторов от точек фигуры до исходной точки
-        atV = tuple([xt - abV[0], yt - abV[1]])
-        btV = tuple([xt - bcV[0], yt - bcV[1]])
-        ctV = tuple([xt - caV[0], yt - caV[1]])
+        atV = tuple([xt - self.dotA.x, yt - self.dotA.y])
+        btV = tuple([xt - self.dotB.x, yt - self.dotB.y])
+        ctV = tuple([xt - self.dotC.x, yt - self.dotC.y])
 
         # Проверка на принадлежность исходной точки данной фигуре
-        if ((Nab[0]*atV[0] + Nab[1]+atV[1] >= 0) and 
+        if ((
+            (Nab[0]*atV[0] + Nab[1]*atV[1] >= 0) and 
             (Nbc[0]*btV[0] + Nbc[1]*btV[1] >= 0) and 
-            (Nca[0]*ctV[0] + Nca[1]+ctV[1] >= 0)): return True
+            (Nca[0]*ctV[0] + Nca[1]*ctV[1] >= 0)
+            )
+
+            or
+
+            (
+            (Nab[0]*atV[0] + Nab[1]*atV[1] < 0) and 
+            (Nbc[0]*btV[0] + Nbc[1]*btV[1] < 0) and 
+            (Nca[0]*ctV[0] + Nca[1]*ctV[1] < 0)
+            )):
+            
+            return True
 
         return False
 
@@ -77,24 +89,23 @@ def lightFactor(F: figure, P: dot, L: dot):
     vec_prod = (L.x - P.x)*(N.x) + (L.y - P.y)*(N.y) + (L.z - P.z)*(N.z)
 
     # IL = vec_prod / (NP * LP)
-    return abs(vec_prod / (NP * LP))
+    return vec_prod / (NP * LP)
 
 
-A = dot(7, 4, 3)
-B = dot(19, 7, 5)
-C = dot(9, 0, 2)
+A = dot(7, 4, 0)
+B = dot(9, 0, 0)
+C = dot(19, 7, 0) 
 
 L = dot(10, 10, 20)
 
 F = figure(A, B, C, (255, 0, 0))
 
-with Image.new("RGB", (100, 100)) as image:
+with Image.new("RGB", (20, 20)) as image:
     for X in range(image.height):
         for Y in range(image.width):
             if F.isIn(X, Y):
                 Z = F.zCoord(X, Y)
                 I = lightFactor(F, dot(X, Y, Z), L)
-                # new_colour = 
                 image.putpixel((X, Y), tuple( [int(C*I) for C in F.colour] ) )
 
     plt.imshow(image)
