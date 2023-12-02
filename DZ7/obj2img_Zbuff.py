@@ -20,7 +20,10 @@ class figure:
         coefC = (self.dotB.x - self.dotA.x)*(self.dotC.y - self.dotA.y) - (self.dotB.y - self.dotA.y)*(self.dotC.x - self.dotA.x)
         coefD = -self.dotA.x*coefA + self.dotA.y*coefB - self.dotA.z*coefC
 
-        return (-coefA*xi - coefB*yi - coefD)/coefC
+        if coefC != 0:
+            return (-coefA*xi - coefB*yi - coefD)/coefC
+        
+        return -1
 
     def in_figure(self, xt: int, yt: int):
         # Проверка будет производиться для обоих обходов
@@ -79,12 +82,17 @@ with open(input("Введите полный путь к файлу: ")) as file
             figures.append( list(int(fig) for fig in line) )
 
     
-with Image.new("RGB", (100, 100)) as image:
+with Image.new("RGB", (26, 26)) as image:
+    for x in range(0, image.width):
+        for y in range(0, image.height):
+            if(x%2 == y%2):
+                image.putpixel((x, y), (54, 54, 54))
+
     for i in range(len(dots)):
-        dots[i] = ChangeDot(get_scale_matrix(35, 35, 35), get_vector(dots[i]))
+        dots[i] = ChangeDot(get_scale_matrix(15, 15, 15), get_vector(dots[i]))
         dots[i] = ChangeDot(get_rotate_matrix_Z(35), get_vector(dots[i]))
         dots[i] = ChangeDot(get_rotate_matrix_X(55), get_vector(dots[i]))
-        dots[i] = ChangeDot(get_move_matrix(50, 50), get_vector(dots[i]))
+        dots[i] = ChangeDot(get_move_matrix(13, 13), get_vector(dots[i]))
         xmin = int(min(xmin, dots[i].x))
         xmax = int(max(xmax, dots[i].x))
         ymin = int(min(ymin, dots[i].y))
@@ -94,16 +102,20 @@ with Image.new("RGB", (100, 100)) as image:
         figures[i] = figure(dots[figures[i][0]-1], dots[figures[i][1]-1],
                             dots[figures[i][2]-1],
                             tuple([random.randrange(255+1), random.randrange(255+1), random.randrange(255+1)]))
-        print(str(i) + " = " + str(figures[i].colour))
+        print(str(i+1) + " = " + str(figures[i].colour))
 
     # Проход по всей плоскости и вычисление видимой части фигуры
     for X in range(xmin, xmax+1):
         for Y in range(ymin, ymax+1):
             current_fig = None
+            current_z = None
             for i in range(len(figures)):
                 if figures[i].in_figure(X, Y):
-                    if ((current_fig is None) or (current_fig.getZ(X, Y) < figures[i].getZ(X, Y))):
+                    fig_z = figures[i].getZ(X, Y)
+                    if ((current_fig is None) or (fig_z >= current_z)):
                         current_fig = figures[i]
+                        current_z = fig_z
+
 
             if current_fig is not None:
                 image.putpixel((X, Y), current_fig.colour)
