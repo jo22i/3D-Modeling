@@ -16,11 +16,11 @@ def on_click(event):
     elif event.button == 3:
         # image.putpixel((round(event.xdata), round(event.ydata)), (0, 255, 0))
         # Получение координат первой точки
-        if(dots_axes[0][0] == None):
-            dots_axes[0][0], dots_axes[0][1] = int(event.xdata), int(event.ydata)
+        if(len(dots_axes) == 0):
+            dots_axes.append([int(event.xdata), int(event.ydata)])
         # Получение координаты второй точки, окончание обработки событий мыши
         else:
-            dots_axes[1][0], dots_axes[1][1] = int(event.xdata), int(event.ydata)
+            dots_axes.append([int(event.xdata), int(event.ydata)])
             plt.disconnect(cid)
 
 
@@ -36,24 +36,27 @@ def Cyrus_Beck():
         # yN = (polygon_axes[i+1][1] - polygon_axes[i][1])
         normal = [ -(polygon_axes[i+1][1] - polygon_axes[i][1]), (polygon_axes[i+1][0] - polygon_axes[i][0]) ]
 
-        # Расчёт какой-то херни
+        Api_vector = [ (dots_axes[0][0] - polygon_axes[i][0]), (dots_axes[0][1] - polygon_axes[i][1]) ]
 
         # Скалярное произведение внутренней нормали отрезка и вектора прямой позволят определить
         # как входит прямая в данную сторону: снаружи внутрь или изнутри в наружу
         # Если данный параметр равен нулю, то значит что прямая параллельна данному отрезку
         # и есть 2 возможных варианта:
-        # 1) Если прямая лежит внутри фигуры, то можно продолжить расчёты
-        # 2) Прямая лежит снаружи фигуры, то можно не продолжать расчёты, т.к. не будет других
-        # действительных пересечений
-        side = normal[0]*AB_vector[0] + normal[1]*AB_vector[1]
+        # 1) Если прямая лежит внутри фигуры
+        # 2) Прямая лежит снаружи фигуры
+        Pi = normal[0]*AB_vector[0] + normal[1]*AB_vector[1]
 
-        if side == 0:
-            if smth:
-                return None
+        # Скалярное произведение вектора A_pi на нормаль отрезка, позволяет определить положение прямой
+        # относительно отрезка в случае параллельного расположения
+        # Если Qi < 0, то это значит что отрезок находится вне фигуры и дальнейшие вычисления не нужны
+        Qi = normal[0]*Api_vector[0] + normal[1]*Api_vector[1]
+
+        if Pi == 0:
+            if Qi < 0: return None
             continue
 
         # Вычисляем параметр t. Если он не лежит в промежутке от 0 до 1, то точка пересечения - мнимая
-        t = :ALMd;amw;dmaw;divmod
+        t = -Qi / Pi
 
         if 0 <= t <= 1: continue
 
@@ -61,7 +64,7 @@ def Cyrus_Beck():
         # вектор входит внутрь фигуры
         # поэтому считаем начальную точку пересечения
         # Иначе отрезок выходит из фигуры и мы считаем конечную точку пересечения
-        if side > 0:
+        if Pi > 0:
             t_begin = max(t_begin, t)
 
         else:
@@ -69,13 +72,19 @@ def Cyrus_Beck():
 
     # TO DO: подумать насчёт формата вывода: через параметр t или сразу координатами,
     # или вообще всё рисовать в функции
-    pass 
+    return t_begin, t_end
+
+
+def get_cords(T: float):
+    X = dots_axes[1][0] * T + (1 - T) * dots_axes[0][0]
+    Y = dots_axes[1][1] * T + (1 - T) * dots_axes[0][1]
+    return X, Y
 
 
 polygon_axes = []
 # [[xA, yA],
 #   xB, yB]]
-dots_axes = [[None]*2]*2
+dots_axes = []
 
 with Image.new('RGB', (50, 50)) as image:
     image = ImageOps.flip(image)
@@ -91,13 +100,30 @@ with Image.new('RGB', (50, 50)) as image:
     plt.show()
 
     # Прорисовка изначального положения прямой
-    Bresenham(image, dots_axes[0], dots_axes[1], dots_axes[2], dots_axes[3], (255, 0, 0))
+    Bresenham(image, dots_axes[0][0], dots_axes[0][1], dots_axes[1][0], dots_axes[1][1], (255, 0, 0))
 
     # Прорисовка многоугольника
     for i in range(-1, len(polygon_axes)-1):
-        Bresenham(polygon_axes[i][0], polygon_axes[i][1], polygon_axes[i+1][0], polygon_axes[i+1][1], (0, 0, 255))
+        Bresenham(image, polygon_axes[i][0], polygon_axes[i][1], polygon_axes[i+1][0], polygon_axes[i+1][1], (0, 0, 255))
 
-    fklal
+    answer = Cyrus_Beck()
+
+    if answer is not None:
+        if answer[1] < answer[0]:
+            print("Отрезок вне окна")
+        else:
+            x_begin, y_begin, x_end, y_end = 0, 0, 0, 0
+            if answer[0] == 0:
+                x_begin, y_begin = dots_axes[0][0], dots_axes[0][1]
+            else:
+                x_begin, y_begin = get_cords(answer[0])
+            
+            if answer[1] == 1:
+                x_end, y_end = dots_axes[1][0], dots_axes[1][1]
+            else:
+                x_end, y_end = get_cords(answer[0])
+
+            Bresenham(image, x_begin, y_begin, x_end, y_end, (255, 255, 255))        
 
     plt.imshow(image)
     plt.show()
