@@ -76,8 +76,12 @@ def lightFactor(F: figure, P: dot, L: dot):
     NP = sqrt((N.x)**2 + (N.y)**2 + (N.z)**2)
     vec_prod = (L.x - P.x)*(N.x) + (L.y - P.y)*(N.y) + (L.z - P.z)*(N.z)
 
-    # IL = vec_prod / (NP * LP)
-    return (vec_prod / (NP * LP))
+    # Постоянное фотовое освещение
+    Iconst = 0.75
+    # Освещённость от точечного источника света
+    IL = vec_prod / (NP * LP)
+    
+    return (Iconst + IL)
 
 
 dots = []
