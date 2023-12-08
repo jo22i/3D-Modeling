@@ -1,144 +1,127 @@
 from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
+from Bresenham import Bresenham
+
 
 # Функция обработки кнопок мыши, отключается как только пользователь введёт координаты отрезка
 def on_click(event):
-    global xA, yA, xB, yB, cid
+    global polygon_axes, dots_axes, cid
 
     # Обработка левой кнопки мыши, отвечающая за получение координат многоугольника
     if event.button == 1:
         # image.putpixel((round(event.xdata), round(event.ydata)), (255, 0, 0))
-        polygon_axes.append([round(event.xdata), round(event.ydata)])
+        polygon_axes.append([int(event.xdata), int(event.ydata)])
 
     # Обработка правой кнопки мыши, отвечающая за получение координат отрезка
     elif event.button == 3:
         # image.putpixel((round(event.xdata), round(event.ydata)), (0, 255, 0))
         # Получение координат первой точки
-        if(xA == yA == None):
-            xA, yA = round(event.xdata), round(event.ydata)
+        if(len(dots_axes) == 0):
+            dots_axes.append([int(event.xdata), int(event.ydata)])
         # Получение координаты второй точки, окончание обработки событий мыши
         else:
-            xB, yB = round(event.xdata), round(event.ydata)
+            dots_axes.append([int(event.xdata), int(event.ydata)])
             plt.disconnect(cid)
 
-def Bresenham(x0, y0, x1, y1, color = (255, 255, 255)):
-    delta_x = abs(x1 - x0)
-    delta_y = abs(y1 - y0)
-    error = 0
-    diff = 1
-
-    # Смена координат в случае, если начальная координата дальше по оси х, чем конечная
-    if(x0 - x1 > 0):
-        x0, x1 = x1, x0
-        y0, y1 = y1, y0
-
-    # Проверка на убывание
-    if(y0 - y1 > 0):
-        diff = -1
-
-    # Если угол меньше или равно 45, то увеличиваем/уменьшаем координату y
-    if(delta_x >= delta_y):
-        y_i = y0
-        for x in range(x0, x1 + 1):
-            image.putpixel((x, y_i), color)
-            error = error + 2 * delta_y
-            if error >= delta_x:
-                y_i += diff
-                error -= 2 * delta_x
-    # Иначе - по координате x
-    elif(delta_x < delta_y):
-        # Обработка особого случая
-        if(diff == -1):
-            x0, x1 = x1, x0
-            y0, y1 = y1, y0
-        x_i = x0
-        for y in range(y0, y1 + 1):
-            image.putpixel((x_i, y), color)
-            error = error + 2 * delta_x
-            if error >= delta_y:
-                x_i += diff
-                error -= 2 * delta_y
 
 def Cyrus_Beck():
-    global xA, yA, xB, yB, polygon_axes
+    global dots_axes, polygon_axes
 
-    tA, tB = 0, 1
-    Dx, Dy = (xB - xA), (yB - yA)
+    edited = False
+    t_begin, t_end = 0, 1
+    AB_vector = [(dots_axes[1][0] - dots_axes[0][0]), (dots_axes[1][1] - dots_axes[0][1])]
 
+    # Обход вершин будет осуществляться по часовой стрелке
     for i in range(-1, len(polygon_axes)-1):
-        xp1, yp1 = int(polygon_axes[i][0]), int(polygon_axes[i][1])
-        xp2, yp2 = int(polygon_axes[i+1][0]), int(polygon_axes[i+1][1])
+        # xN = (polygon_axes[i+1][0] - polygon_axes[i][0])
+        # yN = (polygon_axes[i+1][1] - polygon_axes[i][1])
+        normal = [ -(polygon_axes[i+1][1] - polygon_axes[i][1]), (polygon_axes[i+1][0] - polygon_axes[i][0]) ]
 
-        # Координаты внутренней нормали
-        xN, yN = yp1 - yp2, xp2 - xp1
+        Api_vector = [ (dots_axes[0][0] - polygon_axes[i][0]), (dots_axes[0][1] - polygon_axes[i][1]) ]
 
-        # Скалярное произведение внутренней нормали Ni(xN, yN) на вектор pi_O
-        # Необходима для определения положения линии относительно ребра окна
-        Qi = (xA - xp1)*xN + (yA - yp1)*yN
+        # Скалярное произведение внутренней нормали отрезка и вектора прямой позволят определить
+        # как входит прямая в данную сторону: снаружи внутрь или изнутри в наружу
+        # Если данный параметр равен нулю, то значит что прямая параллельна данному отрезку
+        # и есть 2 возможных варианта:
+        # 1) Если прямая лежит внутри фигуры
+        # 2) Прямая лежит снаружи фигуры
+        Pi = normal[0]*AB_vector[0] + normal[1]*AB_vector[1]
 
-        # Скалярное произведение для определения ориентации отрезка относительно i-й стороны окна
-        Pi = Dx*xN + Dy*yN
+        # Скалярное произведение вектора A_pi на нормаль отрезка, позволяет определить положение прямой
+        # относительно отрезка в случае параллельного расположения
+        # Если Qi < 0, то это значит что отрезок находится вне фигуры и дальнейшие вычисления не нужны
+        Qi = normal[0]*Api_vector[0] + normal[1]*Api_vector[1]
 
-        # Вырождение: или точка, или отрезок вне окна
-        if(Pi == 0):
-            # Отрезок вне окна, отсечение закончено
-            # Иначе рассматриваем след. отрезок
-            if(Qi < 0): return None, None
+        if Pi == 0:
+            if Qi < 0: return None
             continue
-        # Вычисляется параметр t, а также смотрим его положение относительно началов отрезков
-        # Если Pi < 0, то эта точка ближе к концу отрезка, поэтому смотрим наименьшее значение
-        # Иначе точка ближе к началу отрезка, и мы ищем наибольшее значение
-        t = - (Qi / Pi)
-        if not(0 <= t <= 1): continue
 
-        if(Pi < 0):
-            tB = min(tB, t)
-            if (tA > tB): return None, None
+        # Вычисляем параметр t. Если он не лежит в промежутке от 0 до 1, то точка пересечения - мнимая
+        t = -Qi / Pi
+
+        if not 0 <= t <= 1: continue
+
+        # Если скалярное произведение вектора нормали и вектора отрезка положительно, то
+        # вектор входит внутрь фигуры
+        # поэтому считаем начальную точку пересечения
+        # Иначе отрезок выходит из фигуры и мы считаем конечную точку пересечения
+        if Pi > 0:
+            t_begin = max(t_begin, t)
         else:
-            tA = max(tA, t)
-            if (tA > tB): return None, None
-
-    if (tA <= tB):
-        return tA, tB
+            t_end = min(t_end, t)
     
-    return None, None
+    return t_begin, t_end
 
+
+def get_cords(T: float):
+    X = int(dots_axes[1][0] * T + (1 - T) * dots_axes[0][0])
+    Y = int(dots_axes[1][1] * T + (1 - T) * dots_axes[0][1])
+    return X, Y
+
+
+# [[xA, yA],
+#   xB, yB]]
 polygon_axes = []
-xA, yA, xB, yB = None, None, None, None
-image = Image.new('RGB', (50, 50))
-image = ImageOps.flip(image)
-cid = plt.connect("button_press_event", on_click)
+dots_axes = []
 
-# Заполнение координатной плоскости серыми квадратами для лучшего визуального наблюдения
-for x in range(0, image.width):
-    for y in range(0, image.height):
-        if(x%2 == y%2):
-            image.putpixel((x, y), (54, 54, 54))
+with Image.new('RGB', (50, 50)) as image:
+    image = ImageOps.flip(image)
+    cid = plt.connect("button_press_event", on_click)
 
-plt.imshow(image)
-plt.show()
+    # Заполнение координатной плоскости серыми квадратами для лучшего визуального наблюдения
+    for x in range(0, image.width):
+        for y in range(0, image.height):
+            if(x%2 == y%2):
+                image.putpixel((x, y), (54, 54, 54))
 
-# Прорисовка изначального положения прямой
-Bresenham(xA, yA, xB, yB, (255, 0, 0))
+    plt.imshow(image)
+    plt.show()
 
-# Прорисовка многоугольника
-for i in range(-1, len(polygon_axes)-1):
-    Bresenham(polygon_axes[i][0], polygon_axes[i][1], polygon_axes[i+1][0], polygon_axes[i+1][1], (0, 0, 255))
+    # Прорисовка изначального положения прямой
+    Bresenham(image, dots_axes[0][0], dots_axes[0][1], dots_axes[1][0], dots_axes[1][1], (255, 0, 0))
 
-# Получаем параметры начала и конца отсечённого отрезка в виде параметров точек
-t_begin, t_end = Cyrus_Beck()
+    # Прорисовка многоугольника
+    for i in range(-1, len(polygon_axes)-1):
+        Bresenham(image, polygon_axes[i][0], polygon_axes[i][1], polygon_axes[i+1][0], polygon_axes[i+1][1], (0, 0, 255))
 
-# Если выполняется условие, то отрисовываем линию, получив координаты точек через параметрическое уравнение,
-# с поправкой на то, что часть отрезка или весь отрезок может оказаться внутри
-if ((t_begin and t_end) != None):
-    if(t_begin != 0):
-        xA, yA = round(xB*t_begin + xA*(1-t_begin)), round(yB*t_begin + yA*(1-t_begin))
-    if(t_end != 1):
-        xB, yB = round(xB*t_end + xA*(1-t_end)), round(yB*t_end + yA*(1-t_end))
+    answer = Cyrus_Beck()
 
-    Bresenham(xA, yA, xB, yB)
+    if answer is not None:
+        if answer[1] < answer[0]:
+            print("Отрезок вне окна")
+        else:
+            x_begin, y_begin, x_end, y_end = 0, 0, 0, 0
+            if answer[0] == 0:
+                x_begin, y_begin = dots_axes[0][0], dots_axes[0][1]
+            else:
+                x_begin, y_begin = get_cords(answer[0])
+            
+            if answer[1] == 1:
+                x_end, y_end = dots_axes[1][0], dots_axes[1][1]
+            else:
+                x_end, y_end = get_cords(answer[1])
 
-plt.imshow(image)
-plt.show()
+            Bresenham(image, x_begin, y_begin, x_end, y_end, (255, 255, 255))        
 
-print("OK!")
+    plt.imshow(image)
+    plt.show()
