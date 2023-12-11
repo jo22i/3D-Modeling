@@ -11,10 +11,6 @@ def is_visible(fig: list):
     xb, yb, zb = dots[fig[1]-1][0], dots[fig[1]-1][1], dots[fig[1]-1][2]
     xc, yc, zc = dots[fig[2]-1][0], dots[fig[2]-1][1], dots[fig[2]-1][2]
 
-    xa, ya, za = int(xa), int(ya), int(za)
-    xb, yb, zb = int(xb), int(yb), int(zb)
-    xc, yc, zc = int(xc), int(yc), int(zc)
-
     # A = (yb-ya)*(zc-za) - (zb-za)*(yc-ya)
     # B = (xc-xa)*(zb-za) - (xb-xa)*(zc-za)
     C = (xb-xa)*(yc-ya) - (yb-ya)*(xc-xa)
